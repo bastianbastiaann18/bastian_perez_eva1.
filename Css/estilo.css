@@ -322,6 +322,7 @@ main {
   overflow: hidden;
   box-shadow: var(--shadow-lg);
   transition: var(--transition);
+  height: auto;
 }
 
 .hero-image:hover {

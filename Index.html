@@ -22,6 +22,7 @@
         <a href="#productos" class="nav-link">Productos</a>
         <a href="#nosotros" class="nav-link">Nosotros</a>
         <a href="#contacto" class="nav-link">Contacto</a>
+        <button id="authButton" class="btn btn-secondary" style="margin-left: 16px;">Ingresar</button>
       </nav>
       <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema" title="Cambiar a modo oscuro">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -44,6 +45,70 @@
     </header>
 
     <main>
+      <!-- MODALES DE REGISTRO Y LOGIN -->
+      <div id="authModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <button class="modal-close" id="closeModal" aria-label="Cerrar modal">&times;</button>
+          
+          <div class="auth-tabs">
+            <button class="auth-tab active" id="loginTab">Ingresar</button>
+            <button class="auth-tab" id="registerTab">Registrarse</button>
+          </div>
+
+          <!-- FORMULARIO DE LOGIN -->
+          <form id="loginForm" class="auth-form active" novalidate>
+            <h3 class="form-title">Ingresar a tu Cuenta</h3>
+            
+            <div class="form-group">
+              <label for="loginEmail" class="form-label">Email*</label>
+              <input type="email" id="loginEmail" name="email" class="form-input" placeholder="tu@email.com" required />
+              <span class="error-message" id="loginEmailError"></span>
+            </div>
+            
+            <div class="form-group">
+              <label for="loginPassword" class="form-label">Contraseña*</label>
+              <input type="password" id="loginPassword" name="password" class="form-input" placeholder="Tu contraseña" required />
+              <span class="error-message" id="loginPasswordError"></span>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Ingresar</button>
+            <div id="loginMsg" class="form-message"></div>
+          </form>
+
+          <!-- FORMULARIO DE REGISTRO -->
+          <form id="registerForm" class="auth-form" novalidate>
+            <h3 class="form-title">Crear Nueva Cuenta</h3>
+            
+            <div class="form-group">
+              <label for="registerUsername" class="form-label">Usuario*</label>
+              <input type="text" id="registerUsername" name="username" class="form-input" placeholder="Tu nombre de usuario" required />
+              <span class="error-message" id="registerUsernameError"></span>
+            </div>
+            
+            <div class="form-group">
+              <label for="registerEmail" class="form-label">Email*</label>
+              <input type="email" id="registerEmail" name="email" class="form-input" placeholder="tu@email.com" required />
+              <span class="error-message" id="registerEmailError"></span>
+            </div>
+            
+            <div class="form-group">
+              <label for="registerPassword" class="form-label">Contraseña*</label>
+              <input type="password" id="registerPassword" name="password" class="form-input" placeholder="Mínimo 8 caracteres" required />
+              <span class="error-message" id="registerPasswordError"></span>
+            </div>
+            
+            <div class="form-group">
+              <label for="registerPasswordConfirm" class="form-label">Confirmar Contraseña*</label>
+              <input type="password" id="registerPasswordConfirm" name="passwordConfirm" class="form-input" placeholder="Repite tu contraseña" required />
+              <span class="error-message" id="registerPasswordConfirmError"></span>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Registrarse</button>
+            <div id="registerMsg" class="form-message"></div>
+          </form>
+        </div>
+      </div>
+
       <section class="hero" id="inicio">
         <div class="hero-content">
           <h1 class="hero-title">Panes y bollería frescos cada mañana</h1>
@@ -138,16 +203,22 @@
               <div class="form-group">
                 <label for="nombre" class="form-label">Nombre*</label>
                 <input type="text" id="nombre" name="nombre" class="form-input" placeholder="Tu nombre" required />
+                <span class="error-message" id="nombreError"></span>
               </div>
               
               <div class="form-group">
-                <label for="contacto" class="form-label">Teléfono o Email*</label>
-                <input type="text" id="contacto" name="contacto" class="form-input" placeholder="Tu teléfono o email" required />
+                <label for="asunto" class="form-label">Asunto*</label>
+                <input type="text" id="asunto" name="asunto" class="form-input" placeholder="Asunto del mensaje" required />
+                <span class="error-message" id="asuntoError"></span>
               </div>
               
               <div class="form-group">
                 <label for="mensaje" class="form-label">Tu Pedido / Mensaje*</label>
-                <textarea id="mensaje" name="mensaje" class="form-textarea" rows="5" placeholder="Cuéntanos qué deseas encargar..." required></textarea>
+                <textarea id="mensaje" name="mensaje" class="form-textarea" rows="5" placeholder="Cuéntanos qué deseas encargar..." maxlength="500" required></textarea>
+                <div class="char-counter">
+                  <span id="charCount">0</span> / 500 caracteres
+                </div>
+                <span class="error-message" id="mensajeError"></span>
               </div>
               
               <div class="form-actions">

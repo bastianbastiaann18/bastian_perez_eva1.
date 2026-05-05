@@ -271,6 +271,269 @@ function resetFilters() {
   renderProducts(products);
 }
 
+// ============================================
+// ELEMENTOS DEL DOM - AUTENTICACIÓN
+// ============================================
+
+const authModal = document.getElementById('authModal');
+const authButton = document.getElementById('authButton');
+const closeModal = document.getElementById('closeModal');
+const loginTab = document.getElementById('loginTab');
+const registerTab = document.getElementById('registerTab');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const loginMsg = document.getElementById('loginMsg');
+const registerMsg = document.getElementById('registerMsg');
+const charCount = document.getElementById('charCount');
+const mensajeField = document.getElementById('mensaje');
+
+// ============================================
+// FUNCIONES DE VALIDACIÓN
+// ============================================
+
+/**
+ * Valida que un email tenga formato correcto
+ * @param {string} email - Email a validar
+ * @returns {boolean} True si es válido
+ */
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+/**
+ * Valida que una contraseña tenga al menos 8 caracteres
+ * @param {string} password - Contraseña a validar
+ * @returns {boolean} True si es válido
+ */
+function isValidPassword(password) {
+  return password.length >= 8;
+}
+
+/**
+ * Muestra un error en un campo específico
+ * @param {string} fieldId - ID del campo
+ * @param {string} errorId - ID del elemento de error
+ * @param {string} message - Mensaje de error
+ */
+function showFieldError(fieldId, errorId, message) {
+  const field = document.getElementById(fieldId);
+  const errorElement = document.getElementById(errorId);
+  
+  if (field) field.classList.add('input-error');
+  if (errorElement) errorElement.textContent = message;
+}
+
+/**
+ * Limpia el error de un campo
+ * @param {string} fieldId - ID del campo
+ * @param {string} errorId - ID del elemento de error
+ */
+function clearFieldError(fieldId, errorId) {
+  const field = document.getElementById(fieldId);
+  const errorElement = document.getElementById(errorId);
+  
+  if (field) field.classList.remove('input-error');
+  if (errorElement) errorElement.textContent = '';
+}
+
+// ============================================
+// MANEJADORES DE FORMULARIOS DE AUTENTICACIÓN
+// ============================================
+
+/**
+ * Abre el modal de autenticación
+ */
+function openAuthModal() {
+  authModal.style.display = 'flex';
+  authModal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+/**
+ * Cierra el modal de autenticación
+ */
+function closeAuthModal() {
+  authModal.style.display = 'none';
+  authModal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  clearAllAuthErrors();
+  clearAuthMessages();
+}
+
+/**
+ * Limpia todos los errores del modal
+ */
+function clearAllAuthErrors() {
+  document.querySelectorAll('.input-error').forEach(field => {
+    field.classList.remove('input-error');
+  });
+  document.querySelectorAll('.error-message').forEach(error => {
+    error.textContent = '';
+  });
+}
+
+/**
+ * Limpia los mensajes de éxito/error
+ */
+function clearAuthMessages() {
+  loginMsg.className = 'form-message';
+  registerMsg.className = 'form-message';
+  loginMsg.textContent = '';
+  registerMsg.textContent = '';
+}
+
+/**
+ * Cambia la pestaña de autenticación
+ * @param {string} tab - 'login' o 'register'
+ */
+function switchAuthTab(tab) {
+  const tabs = document.querySelectorAll('.auth-tab');
+  const forms = document.querySelectorAll('.auth-form');
+  
+  tabs.forEach(t => t.classList.remove('active'));
+  forms.forEach(f => f.classList.remove('active'));
+  
+  if (tab === 'login') {
+    loginTab.classList.add('active');
+    loginForm.classList.add('active');
+  } else {
+    registerTab.classList.add('active');
+    registerForm.classList.add('active');
+  }
+  
+  clearAllAuthErrors();
+  clearAuthMessages();
+}
+
+/**
+ * Maneja el envío del formulario de login
+ */
+function handleLoginSubmit(event) {
+  event.preventDefault();
+  clearAllAuthErrors();
+  clearAuthMessages();
+  
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  let isValid = true;
+
+  // Validar email
+  if (!email) {
+    showFieldError('loginEmail', 'loginEmailError', 'El email es obligatorio');
+    isValid = false;
+  } else if (!isValidEmail(email)) {
+    showFieldError('loginEmail', 'loginEmailError', 'Por favor ingresa un email válido');
+    isValid = false;
+  } else {
+    clearFieldError('loginEmail', 'loginEmailError');
+  }
+
+  // Validar contraseña
+  if (!password) {
+    showFieldError('loginPassword', 'loginPasswordError', 'La contraseña es obligatoria');
+    isValid = false;
+  } else {
+    clearFieldError('loginPassword', 'loginPasswordError');
+  }
+
+  if (!isValid) return;
+
+  // Mostrar mensaje de éxito
+  loginMsg.className = 'form-message success';
+  loginMsg.textContent = `¡Bienvenido ${email}! Acceso exitoso.`;
+  
+  console.log({
+    action: 'login',
+    email,
+    timestamp: new Date().toISOString()
+  });
+
+  loginForm.reset();
+  
+  setTimeout(() => {
+    closeAuthModal();
+  }, 2000);
+}
+
+/**
+ * Maneja el envío del formulario de registro
+ */
+function handleRegisterSubmit(event) {
+  event.preventDefault();
+  clearAllAuthErrors();
+  clearAuthMessages();
+  
+  const username = document.getElementById('registerUsername').value.trim();
+  const email = document.getElementById('registerEmail').value.trim();
+  const password = document.getElementById('registerPassword').value.trim();
+  const passwordConfirm = document.getElementById('registerPasswordConfirm').value.trim();
+  let isValid = true;
+
+  // Validar usuario
+  if (!username) {
+    showFieldError('registerUsername', 'registerUsernameError', 'El usuario es obligatorio');
+    isValid = false;
+  } else if (username.length < 3) {
+    showFieldError('registerUsername', 'registerUsernameError', 'El usuario debe tener al menos 3 caracteres');
+    isValid = false;
+  } else {
+    clearFieldError('registerUsername', 'registerUsernameError');
+  }
+
+  // Validar email
+  if (!email) {
+    showFieldError('registerEmail', 'registerEmailError', 'El email es obligatorio');
+    isValid = false;
+  } else if (!isValidEmail(email)) {
+    showFieldError('registerEmail', 'registerEmailError', 'Por favor ingresa un email válido');
+    isValid = false;
+  } else {
+    clearFieldError('registerEmail', 'registerEmailError');
+  }
+
+  // Validar contraseña
+  if (!password) {
+    showFieldError('registerPassword', 'registerPasswordError', 'La contraseña es obligatoria');
+    isValid = false;
+  } else if (!isValidPassword(password)) {
+    showFieldError('registerPassword', 'registerPasswordError', 'La contraseña debe tener al menos 8 caracteres');
+    isValid = false;
+  } else {
+    clearFieldError('registerPassword', 'registerPasswordError');
+  }
+
+  // Validar confirmación de contraseña
+  if (!passwordConfirm) {
+    showFieldError('registerPasswordConfirm', 'registerPasswordConfirmError', 'Confirma tu contraseña');
+    isValid = false;
+  } else if (password !== passwordConfirm) {
+    showFieldError('registerPasswordConfirm', 'registerPasswordConfirmError', 'Las contraseñas no coinciden');
+    isValid = false;
+  } else {
+    clearFieldError('registerPasswordConfirm', 'registerPasswordConfirmError');
+  }
+
+  if (!isValid) return;
+
+  // Mostrar mensaje de éxito
+  registerMsg.className = 'form-message success';
+  registerMsg.textContent = `¡Bienvenido ${username}! Registro exitoso.`;
+  
+  console.log({
+    action: 'register',
+    username,
+    email,
+    timestamp: new Date().toISOString()
+  });
+
+  registerForm.reset();
+  
+  setTimeout(() => {
+    closeAuthModal();
+  }, 2000);
+}
+
 /**
  * Maneja el envío del formulario de contacto
  */
@@ -278,37 +541,51 @@ function handleFormSubmit(event) {
   event.preventDefault();
   
   const nombre = document.getElementById('nombre').value.trim();
-  const contacto = document.getElementById('contacto').value.trim();
+  const asunto = document.getElementById('asunto').value.trim();
   const mensaje = document.getElementById('mensaje').value.trim();
+  let isValid = true;
 
-  // Validación básica
-  if (!nombre || !contacto || !mensaje) {
-    showMessage('Por favor completa todos los campos.', 'error');
-    return;
+  // Limpiar errores previos
+  clearFieldError('nombre', 'nombreError');
+  clearFieldError('asunto', 'asuntoError');
+  clearFieldError('mensaje', 'mensajeError');
+
+  // Validación de nombre
+  if (!nombre) {
+    showFieldError('nombre', 'nombreError', 'El nombre es obligatorio');
+    isValid = false;
   }
 
-  // Validación de email o teléfono
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^[\d\s\-\+\(\)]{7,}$/;
-  
-  if (!emailRegex.test(contacto) && !phoneRegex.test(contacto)) {
-    showMessage('Por favor ingresa un email o teléfono válido.', 'error');
-    return;
+  // Validación de asunto
+  if (!asunto) {
+    showFieldError('asunto', 'asuntoError', 'El asunto es obligatorio');
+    isValid = false;
   }
 
-  // Aquí normalmente enviarías los datos a un servidor
-  console.log({
-    nombre,
-    contacto,
-    mensaje,
-    timestamp: new Date().toISOString()
-  });
+  // Validación de mensaje
+  if (!mensaje) {
+    showFieldError('mensaje', 'mensajeError', 'El mensaje es obligatorio');
+    isValid = false;
+  }
+
+  if (!isValid) {
+    showMessage('Por favor completa todos los campos correctamente.', 'error');
+    return;
+  }
 
   // Mostrar mensaje de éxito
   showMessage('¡Gracias por tu pedido! Nos contactaremos pronto.', 'success');
   
+  console.log({
+    nombre,
+    asunto,
+    mensaje,
+    timestamp: new Date().toISOString()
+  });
+
   // Limpiar formulario
   contactForm.reset();
+  charCount.textContent = '0';
   
   // Desvanecerá el mensaje después de 5 segundos
   setTimeout(() => {
@@ -360,6 +637,28 @@ function closeMenu() {
 // ============================================
 // EVENT LISTENERS
 // ============================================
+
+// Autenticación
+authButton.addEventListener('click', openAuthModal);
+closeModal.addEventListener('click', closeAuthModal);
+loginTab.addEventListener('click', () => switchAuthTab('login'));
+registerTab.addEventListener('click', () => switchAuthTab('register'));
+loginForm.addEventListener('submit', handleLoginSubmit);
+registerForm.addEventListener('submit', handleRegisterSubmit);
+
+// Cerrar modal al hacer clic fuera
+authModal.addEventListener('click', (e) => {
+  if (e.target === authModal) {
+    closeAuthModal();
+  }
+});
+
+// Contador de caracteres
+if (mensajeField) {
+  mensajeField.addEventListener('input', (e) => {
+    charCount.textContent = e.target.value.length;
+  });
+}
 
 // Filtro de productos
 filterSelect.addEventListener('change', filterProducts);

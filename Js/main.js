@@ -272,411 +272,6 @@ function resetFilters() {
 }
 
 // ============================================
-// ELEMENTOS DEL DOM - AUTENTICACIÓN
-// ============================================
-
-const authModal = document.getElementById('authModal');
-const authButton = document.getElementById('authButton');
-const closeModal = document.getElementById('closeModal');
-const loginTab = document.getElementById('loginTab');
-const registerTab = document.getElementById('registerTab');
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-const loginMsg = document.getElementById('loginMsg');
-const registerMsg = document.getElementById('registerMsg');
-const charCount = document.getElementById('charCount');
-const mensajeField = document.getElementById('mensaje');
-
-// ============================================
-// FUNCIONES DE VALIDACIÓN
-// ============================================
-
-/**
- * Valida que un email tenga formato correcto
- * @param {string} email - Email a validar
- * @returns {boolean} True si es válido
- */
-function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
-
-/**
- * Valida que una contraseña tenga al menos 8 caracteres
- * @param {string} password - Contraseña a validar
- * @returns {boolean} True si es válido
- */
-function isValidPassword(password) {
-  return password.length >= 8;
-}
-
-/**
- * Muestra un error en un campo específico
- * @param {string} fieldId - ID del campo
- * @param {string} errorId - ID del elemento de error
- * @param {string} message - Mensaje de error
- */
-function showFieldError(fieldId, errorId, message) {
-  const field = document.getElementById(fieldId);
-  const errorElement = document.getElementById(errorId);
-  
-  if (field) field.classList.add('input-error');
-  if (errorElement) errorElement.textContent = message;
-}
-
-/**
- * Limpia el error de un campo
- * @param {string} fieldId - ID del campo
- * @param {string} errorId - ID del elemento de error
- */
-function clearFieldError(fieldId, errorId) {
-  const field = document.getElementById(fieldId);
-  const errorElement = document.getElementById(errorId);
-  
-  if (field) field.classList.remove('input-error');
-  if (errorElement) errorElement.textContent = '';
-}
-
-// ============================================
-// MANEJADORES DE FORMULARIOS DE AUTENTICACIÓN
-// ============================================
-
-/**
- * Abre el modal de autenticación
- */
-function openAuthModal() {
-  authModal.style.display = 'flex';
-  authModal.setAttribute('aria-hidden', 'false');
-  document.body.style.overflow = 'hidden';
-}
-
-/**
- * Cierra el modal de autenticación
- */
-function closeAuthModal() {
-  authModal.style.display = 'none';
-  authModal.setAttribute('aria-hidden', 'true');
-  document.body.style.overflow = '';
-  clearAllAuthErrors();
-  clearAuthMessages();
-}
-
-/**
- * Limpia todos los errores del modal
- */
-function clearAllAuthErrors() {
-  document.querySelectorAll('.input-error').forEach(field => {
-    field.classList.remove('input-error');
-  });
-  document.querySelectorAll('.error-message').forEach(error => {
-    error.textContent = '';
-  });
-}
-
-/**
- * Limpia los mensajes de éxito/error
- */
-function clearAuthMessages() {
-  loginMsg.className = 'form-message';
-  registerMsg.className = 'form-message';
-  loginMsg.textContent = '';
-  registerMsg.textContent = '';
-}
-
-/**
- * Cambia la pestaña de autenticación
- * @param {string} tab - 'login' o 'register'
- */
-function switchAuthTab(tab) {
-  const tabs = document.querySelectorAll('.auth-tab');
-  const forms = document.querySelectorAll('.auth-form');
-  
-  tabs.forEach(t => t.classList.remove('active'));
-  forms.forEach(f => f.classList.remove('active'));
-  
-  if (tab === 'login') {
-    loginTab.classList.add('active');
-    loginForm.classList.add('active');
-  } else {
-    registerTab.classList.add('active');
-    registerForm.classList.add('active');
-  }
-  
-  clearAllAuthErrors();
-  clearAuthMessages();
-}
-
-/**
- * Maneja el envío del formulario de login
- */
-function handleLoginSubmit(event) {
-  event.preventDefault();
-  clearAllAuthErrors();
-  clearAuthMessages();
-  
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value.trim();
-  let isValid = true;
-
-  // Validar email
-  if (!email) {
-    showFieldError('loginEmail', 'loginEmailError', 'El email es obligatorio');
-    isValid = false;
-  } else if (!isValidEmail(email)) {
-    showFieldError('loginEmail', 'loginEmailError', 'Por favor ingresa un email válido');
-    isValid = false;
-  } else {
-    clearFieldError('loginEmail', 'loginEmailError');
-  }
-
-  // Validar contraseña
-  if (!password) {
-    showFieldError('loginPassword', 'loginPasswordError', 'La contraseña es obligatoria');
-    isValid = false;
-  } else {
-    clearFieldError('loginPassword', 'loginPasswordError');
-  }
-
-  if (!isValid) return;
-
-  // Mostrar mensaje de éxito
-  loginMsg.className = 'form-message success';
-  loginMsg.textContent = `¡Bienvenido ${email}! Acceso exitoso.`;
-  
-  console.log({
-    action: 'login',
-    email,
-    timestamp: new Date().toISOString()
-  });
-
-  loginForm.reset();
-  
-  setTimeout(() => {
-    closeAuthModal();
-  }, 2000);
-}
-
-/**
- * Maneja el envío del formulario de registro
- */
-function handleRegisterSubmit(event) {
-  event.preventDefault();
-  clearAllAuthErrors();
-  clearAuthMessages();
-  
-  const username = document.getElementById('registerUsername').value.trim();
-  const email = document.getElementById('registerEmail').value.trim();
-  const password = document.getElementById('registerPassword').value.trim();
-  const passwordConfirm = document.getElementById('registerPasswordConfirm').value.trim();
-  let isValid = true;
-
-  // Validar usuario
-  if (!username) {
-    showFieldError('registerUsername', 'registerUsernameError', 'El usuario es obligatorio');
-    isValid = false;
-  } else if (username.length < 3) {
-    showFieldError('registerUsername', 'registerUsernameError', 'El usuario debe tener al menos 3 caracteres');
-    isValid = false;
-  } else {
-    clearFieldError('registerUsername', 'registerUsernameError');
-  }
-
-  // Validar email
-  if (!email) {
-    showFieldError('registerEmail', 'registerEmailError', 'El email es obligatorio');
-    isValid = false;
-  } else if (!isValidEmail(email)) {
-    showFieldError('registerEmail', 'registerEmailError', 'Por favor ingresa un email válido');
-    isValid = false;
-  } else {
-    clearFieldError('registerEmail', 'registerEmailError');
-  }
-
-  // Validar contraseña
-  if (!password) {
-    showFieldError('registerPassword', 'registerPasswordError', 'La contraseña es obligatoria');
-    isValid = false;
-  } else if (!isValidPassword(password)) {
-    showFieldError('registerPassword', 'registerPasswordError', 'La contraseña debe tener al menos 8 caracteres');
-    isValid = false;
-  } else {
-    clearFieldError('registerPassword', 'registerPasswordError');
-  }
-
-  // Validar confirmación de contraseña
-  if (!passwordConfirm) {
-    showFieldError('registerPasswordConfirm', 'registerPasswordConfirmError', 'Confirma tu contraseña');
-    isValid = false;
-  } else if (password !== passwordConfirm) {
-    showFieldError('registerPasswordConfirm', 'registerPasswordConfirmError', 'Las contraseñas no coinciden');
-    isValid = false;
-  } else {
-    clearFieldError('registerPasswordConfirm', 'registerPasswordConfirmError');
-  }
-
-  if (!isValid) return;
-
-  // Mostrar mensaje de éxito
-  registerMsg.className = 'form-message success';
-  registerMsg.textContent = `¡Bienvenido ${username}! Registro exitoso.`;
-  
-  console.log({
-    action: 'register',
-    username,
-    email,
-    timestamp: new Date().toISOString()
-  });
-
-  registerForm.reset();
-  
-  setTimeout(() => {
-    closeAuthModal();
-  }, 2000);
-}
-
-/**
- * Maneja el envío del formulario de contacto
- */
-function handleFormSubmit(event) {
-  event.preventDefault();
-  
-  const nombre = document.getElementById('nombre').value.trim();
-  const asunto = document.getElementById('asunto').value.trim();
-  const mensaje = document.getElementById('mensaje').value.trim();
-  let isValid = true;
-
-  // Limpiar errores previos
-  clearFieldError('nombre', 'nombreError');
-  clearFieldError('asunto', 'asuntoError');
-  clearFieldError('mensaje', 'mensajeError');
-
-  // Validación de nombre
-  if (!nombre) {
-    showFieldError('nombre', 'nombreError', 'El nombre es obligatorio');
-    isValid = false;
-  }
-
-  // Validación de asunto
-  if (!asunto) {
-    showFieldError('asunto', 'asuntoError', 'El asunto es obligatorio');
-    isValid = false;
-  }
-
-  // Validación de mensaje
-  if (!mensaje) {
-    showFieldError('mensaje', 'mensajeError', 'El mensaje es obligatorio');
-    isValid = false;
-  }
-
-  if (!isValid) {
-    showMessage('Por favor completa todos los campos correctamente.', 'error');
-    return;
-  }
-
-  // Mostrar mensaje de éxito
-  showMessage('¡Gracias por tu pedido! Nos contactaremos pronto.', 'success');
-  
-  console.log({
-    nombre,
-    asunto,
-    mensaje,
-    timestamp: new Date().toISOString()
-  });
-
-  // Limpiar formulario
-  contactForm.reset();
-  charCount.textContent = '0';
-  
-  // Desvanecerá el mensaje después de 5 segundos
-  setTimeout(() => {
-    hideMessage();
-  }, 5000);
-}
-
-/**
- * Muestra un mensaje en el formulario
- */
-function showMessage(text, type) {
-  formMsg.textContent = text;
-  formMsg.className = `form-message ${type}`;
-}
-
-/**
- * Oculta el mensaje del formulario
- */
-function hideMessage() {
-  formMsg.className = 'form-message';
-}
-
-/**
- * Abre la ubicación en Google Maps
- */
-function locate() {
-  const latitude = -33.4489;
-  const longitude = -70.6693;
-  const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-  window.open(mapsUrl, '_blank');
-}
-
-/**
- * Maneja el menú hamburguesa
- */
-function toggleMenu() {
-  hamburger.classList.toggle('active');
-  navMenu.classList.toggle('active');
-}
-
-/**
- * Cierra el menú cuando se hace clic en un enlace
- */
-function closeMenu() {
-  hamburger.classList.remove('active');
-  navMenu.classList.remove('active');
-}
-
-// ============================================
-// EVENT LISTENERS
-// ============================================
-
-// Autenticación
-authButton.addEventListener('click', openAuthModal);
-closeModal.addEventListener('click', closeAuthModal);
-loginTab.addEventListener('click', () => switchAuthTab('login'));
-registerTab.addEventListener('click', () => switchAuthTab('register'));
-loginForm.addEventListener('submit', handleLoginSubmit);
-registerForm.addEventListener('submit', handleRegisterSubmit);
-
-// Cerrar modal al hacer clic fuera
-authModal.addEventListener('click', (e) => {
-  if (e.target === authModal) {
-    closeAuthModal();
-  }
-});
-
-// Contador de caracteres
-if (mensajeField) {
-  mensajeField.addEventListener('input', (e) => {
-    charCount.textContent = e.target.value.length;
-  });
-}
-
-// Filtro de productos
-filterSelect.addEventListener('change', filterProducts);
-resetButton.addEventListener('click', resetFilters);
-
-// Formulario de contacto
-contactForm.addEventListener('submit', handleFormSubmit);
-locateBtn.addEventListener('click', locate);
-
-// Menú hamburguesa (para dispositivos móviles)
-hamburger.addEventListener('click', toggleMenu);
-
-// Cerrar menú al hacer clic en un enlace
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', closeMenu);
-});
-
-// ============================================
 // INICIALIZACIÓN
 // ============================================
 
@@ -686,6 +281,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Renderizar todos los productos inicialmente
   renderProducts(products);
+  
+  // Inicializar formulario de contacto
+  inicializarFormularioContacto();
+  
+  // Inicializar autenticación
+  inicializarAutenticacion();
   
   // Smooth scroll para los enlaces de navegación
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -742,7 +343,776 @@ window.addEventListener('scroll', () => {
 // FUNCIONES ADICIONALES
 // ============================================
 
+// ============================================
+// SISTEMA DE GESTIÓN DE CONTACTOS
+// ============================================
+
 /**
- * Función para detectar tema oscuro preferido del sistema
+ * Estructura de datos para usuarios/contactos
  */
-initTheme();
+const Usuario = {
+  /**
+   * Crear un nuevo usuario/contacto
+   * @param {string} nombre - Nombre del usuario
+   * @param {string} email - Email del usuario
+   * @param {string} mensaje - Mensaje del usuario
+   * @returns {Object} Objeto usuario validado
+   */
+  crear: function(nombre, email, mensaje) {
+    // Sanitización de entrada para evitar XSS
+    return {
+      id: Date.now(),
+      nombre: this.sanitizarEntrada(nombre),
+      email: this.sanitizarEntrada(email),
+      mensaje: this.sanitizarEntrada(mensaje),
+      fecha: new Date().toLocaleDateString('es-ES'),
+      hora: new Date().toLocaleTimeString('es-ES')
+    };
+  },
+  
+  /**
+   * Sanitizar entrada de usuario para evitar inyección XSS
+   * @param {string} entrada - Texto a sanitizar
+   * @returns {string} Texto sanitizado
+   */
+  sanitizarEntrada: function(entrada) {
+    const div = document.createElement('div');
+    div.textContent = entrada;
+    return div.innerHTML;
+  }
+};
+
+/**
+ * Array para almacenar la lista de contactos
+ */
+let contactosRegistrados = [];
+
+/**
+ * Cargar contactos del localStorage al iniciar
+ */
+function cargarContactosGuardados() {
+  const contactosGuardados = localStorage.getItem('contactosRicopan');
+  if (contactosGuardados) {
+    try {
+      contactosRegistrados = JSON.parse(contactosGuardados);
+      if (contactosRegistrados.length > 0) {
+        actualizarDOM();
+      }
+    } catch (error) {
+      console.error('Error al cargar contactos guardados:', error);
+      contactosRegistrados = [];
+    }
+  }
+}
+
+/**
+ * Validación de datos del formulario
+ * @param {Object} datos - Objeto con nombre, email y mensaje
+ * @returns {Object} Objeto con validación y errores
+ */
+function validarDatos(datos) {
+  const errores = {};
+  
+  // Validar nombre
+  if (!datos.nombre || datos.nombre.trim().length === 0) {
+    errores.nombre = 'El nombre es requerido';
+  } else if (datos.nombre.trim().length < 3) {
+    errores.nombre = 'El nombre debe tener al menos 3 caracteres';
+  } else if (datos.nombre.trim().length > 100) {
+    errores.nombre = 'El nombre no puede exceder 100 caracteres';
+  }
+  
+  // Validar email con regex más robusta
+  if (!datos.email || datos.email.trim().length === 0) {
+    errores.email = 'El email es requerido';
+  } else {
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(datos.email.trim())) {
+      errores.email = 'Por favor ingresa un email válido (ej: usuario@ejemplo.com)';
+    } else if (datos.email.length > 254) {
+      errores.email = 'El email es demasiado largo';
+    }
+  }
+  
+  // Validar mensaje
+  if (!datos.mensaje || datos.mensaje.trim().length === 0) {
+    errores.mensaje = 'El mensaje es requerido';
+  } else if (datos.mensaje.trim().length < 10) {
+    errores.mensaje = 'El mensaje debe tener al menos 10 caracteres';
+  } else if (datos.mensaje.trim().length > 500) {
+    errores.mensaje = 'El mensaje no puede exceder 500 caracteres';
+  }
+  
+  return {
+    valido: Object.keys(errores).length === 0,
+    errores: errores
+  };
+}
+
+/**
+ * Mostrar errores de validación en el DOM
+ * @param {Object} errores - Objeto con errores de validación
+ */
+function mostrarErrores(errores) {
+  // Limpiar todos los errores primero
+  document.getElementById('nombreError').textContent = '';
+  document.getElementById('emailError').textContent = '';
+  document.getElementById('mensajeError').textContent = '';
+  
+  // Mostrar errores específicos
+  if (errores.nombre) {
+    document.getElementById('nombreError').textContent = errores.nombre;
+  }
+  if (errores.email) {
+    document.getElementById('emailError').textContent = errores.email;
+  }
+  if (errores.mensaje) {
+    document.getElementById('mensajeError').textContent = errores.mensaje;
+  }
+}
+
+/**
+ * Limpiar todos los errores del formulario
+ */
+function limpiarErrores() {
+  document.getElementById('nombreError').textContent = '';
+  document.getElementById('emailError').textContent = '';
+  document.getElementById('mensajeError').textContent = '';
+}
+
+/**
+ * Actualizar el DOM con la lista de contactos
+ */
+function actualizarDOM() {
+  const contactosList = document.getElementById('contactosList');
+  const contactosUl = document.getElementById('contactosUl');
+  
+  if (contactosRegistrados.length === 0) {
+    contactosList.style.display = 'none';
+    contactosUl.innerHTML = '';
+    return;
+  }
+  
+  contactosList.style.display = 'block';
+  contactosUl.innerHTML = '';
+  
+  // Mostrar los últimos 5 contactos (más recientes primero)
+  const contactosMostrados = contactosRegistrados.slice(-5).reverse();
+  
+  contactosMostrados.forEach((contacto, index) => {
+    const li = document.createElement('li');
+    li.style.padding = '12px';
+    li.style.marginBottom = '8px';
+    li.style.backgroundColor = 'var(--bg-alt)';
+    li.style.borderRadius = '8px';
+    li.style.borderLeft = '4px solid var(--primary)';
+    li.style.wordBreak = 'break-word';
+    
+    const nombreSpan = document.createElement('strong');
+    nombreSpan.textContent = contacto.nombre;
+    
+    const emailSpan = document.createElement('span');
+    emailSpan.textContent = ` (${contacto.email})`;
+    emailSpan.style.color = 'var(--text-light)';
+    emailSpan.style.fontSize = '0.9em';
+    
+    const fechaSpan = document.createElement('div');
+    fechaSpan.textContent = `${contacto.fecha} ${contacto.hora}`;
+    fechaSpan.style.fontSize = '0.85em';
+    fechaSpan.style.color = 'var(--text-light)';
+    fechaSpan.style.marginTop = '4px';
+    
+    const mensajeSpan = document.createElement('div');
+    mensajeSpan.textContent = contacto.mensaje;
+    mensajeSpan.style.marginTop = '6px';
+    mensajeSpan.style.fontSize = '0.95em';
+    
+    li.appendChild(nombreSpan);
+    li.appendChild(emailSpan);
+    li.appendChild(fechaSpan);
+    li.appendChild(mensajeSpan);
+    
+    contactosUl.appendChild(li);
+  });
+}
+
+/**
+ * Cambiar imagen (función modular adicional)
+ * @param {string} id - ID del elemento
+ * @param {string} src - Nueva URL de la imagen
+ */
+function cambiarImagen(id, src) {
+  const elemento = document.getElementById(id);
+  if (elemento && elemento.tagName === 'IMG') {
+    elemento.src = src;
+    elemento.style.opacity = '0.7';
+    setTimeout(() => {
+      elemento.style.opacity = '1';
+      elemento.style.transition = 'opacity 0.3s ease-in-out';
+    }, 10);
+  }
+}
+
+/**
+ * Guardar contactos en localStorage
+ */
+function guardarContactosEnStorage() {
+  try {
+    localStorage.setItem('contactosRicopan', JSON.stringify(contactosRegistrados));
+  } catch (error) {
+    console.error('Error al guardar contactos:', error);
+  }
+}
+
+/**
+ * Manejar el envío del formulario de contacto
+ */
+function inicializarFormularioContacto() {
+  const formularioContacto = document.getElementById('contactForm');
+  const inputNombre = document.getElementById('nombre');
+  const inputEmail = document.getElementById('email');
+  const inputMensaje = document.getElementById('mensaje');
+  const charCount = document.getElementById('charCount');
+  const formMsg = document.getElementById('formMsg');
+  
+  // Cargar contactos guardados
+  cargarContactosGuardados();
+  
+  // Actualizar contador de caracteres en tiempo real
+  if (inputMensaje) {
+    inputMensaje.addEventListener('input', function() {
+      charCount.textContent = this.value.length;
+    });
+  }
+  
+  // Manejar envío del formulario
+  if (formularioContacto) {
+    formularioContacto.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Limpiar errores previos
+      limpiarErrores();
+      formMsg.textContent = '';
+      formMsg.className = '';
+      
+      // Obtener datos del formulario
+      const datos = {
+        nombre: inputNombre.value,
+        email: inputEmail.value,
+        mensaje: inputMensaje.value
+      };
+      
+      // Validar datos
+      const validacion = validarDatos(datos);
+      
+      if (!validacion.valido) {
+        mostrarErrores(validacion.errores);
+        formMsg.textContent = '❌ Por favor completa correctamente todos los campos';
+        formMsg.className = 'form-message error';
+        return;
+      }
+      
+      // Crear usuario y agregarlo al array
+      const nuevoContacto = Usuario.crear(datos.nombre, datos.email, datos.mensaje);
+      contactosRegistrados.push(nuevoContacto);
+      
+      // Guardar en localStorage
+      guardarContactosEnStorage();
+      
+      // Actualizar DOM
+      actualizarDOM();
+      
+      // Mostrar mensaje de éxito
+      formMsg.textContent = '✅ ¡Mensaje enviado correctamente! Nos contactaremos pronto.';
+      formMsg.className = 'form-message success';
+      
+      // Limpiar formulario
+      formularioContacto.reset();
+      charCount.textContent = '0';
+      
+      // Ocultar mensaje después de 5 segundos
+      setTimeout(() => {
+        formMsg.textContent = '';
+        formMsg.className = '';
+      }, 5000);
+    });
+  }
+}
+
+// ============================================
+// SISTEMA DE AUTENTICACIÓN
+// ============================================
+
+/**
+ * Estructura de datos para Usuario (Login/Registro)
+ */
+const UsuarioAuth = {
+  /**
+   * Crear un nuevo usuario
+   * @param {string} username - Nombre de usuario
+   * @param {string} email - Email del usuario
+   * @param {string} password - Contraseña (se almacena en texto por simplicidad, en producción usar hash)
+   * @returns {Object} Objeto usuario
+   */
+  crear: function(username, email, password) {
+    return {
+      id: Date.now(),
+      username: this.sanitizarEntrada(username),
+      email: this.sanitizarEntrada(email),
+      password: password, // En producción, usar bcrypt o similar
+      fechaRegistro: new Date().toLocaleDateString('es-ES'),
+      activo: true
+    };
+  },
+  
+  /**
+   * Sanitizar entrada de usuario
+   * @param {string} entrada - Texto a sanitizar
+   * @returns {string} Texto sanitizado
+   */
+  sanitizarEntrada: function(entrada) {
+    const div = document.createElement('div');
+    div.textContent = entrada;
+    return div.innerHTML;
+  }
+};
+
+/**
+ * Array para almacenar usuarios registrados
+ */
+let usuariosRegistrados = [];
+
+/**
+ * Variable para almacenar el usuario actualmente logueado
+ */
+let usuarioActual = null;
+
+/**
+ * Cargar usuarios del localStorage al iniciar
+ */
+function cargarUsuariosGuardados() {
+  const usuariosGuardados = localStorage.getItem('usuariosRicopan');
+  if (usuariosGuardados) {
+    try {
+      usuariosRegistrados = JSON.parse(usuariosGuardados);
+    } catch (error) {
+      console.error('Error al cargar usuarios guardados:', error);
+      usuariosRegistrados = [];
+    }
+  }
+  
+  // Verificar si hay sesión activa
+  const sesionActiva = localStorage.getItem('sesionActiva');
+  if (sesionActiva) {
+    try {
+      usuarioActual = JSON.parse(sesionActiva);
+      actualizarBotonesAutenticacion();
+    } catch (error) {
+      console.error('Error al cargar sesión:', error);
+      usuarioActual = null;
+    }
+  }
+}
+
+/**
+ * Guardar usuarios en localStorage
+ */
+function guardarUsuariosEnStorage() {
+  try {
+    localStorage.setItem('usuariosRicopan', JSON.stringify(usuariosRegistrados));
+  } catch (error) {
+    console.error('Error al guardar usuarios:', error);
+  }
+}
+
+/**
+ * Guardar sesión actual
+ */
+function guardarSesion(usuario) {
+  try {
+    localStorage.setItem('sesionActiva', JSON.stringify(usuario));
+  } catch (error) {
+    console.error('Error al guardar sesión:', error);
+  }
+}
+
+/**
+ * Validar datos de registro
+ * @param {Object} datos - Datos del usuario
+ * @returns {Object} Validación y errores
+ */
+function validarRegistro(datos) {
+  const errores = {};
+  
+  // Validar nombre de usuario
+  if (!datos.username || datos.username.length === 0) {
+    errores.username = 'El nombre de usuario es requerido';
+  } else if (datos.username.length < 3) {
+    errores.username = 'El nombre de usuario debe tener al menos 3 caracteres';
+  } else if (datos.username.length > 50) {
+    errores.username = 'El nombre de usuario no puede exceder 50 caracteres';
+  } else if (!/^[a-zA-Z0-9_-]+$/.test(datos.username)) {
+    errores.username = 'Solo se permiten letras, números, guiones y guiones bajos';
+  } else if (usuariosRegistrados.some(u => u.username.toLowerCase() === datos.username.toLowerCase())) {
+    errores.username = 'Este nombre de usuario ya está registrado';
+  }
+  
+  // Validar email
+  if (!datos.email || datos.email.length === 0) {
+    errores.email = 'El email es requerido';
+  } else {
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(datos.email)) {
+      errores.email = 'Por favor ingresa un email válido (ej: usuario@ejemplo.com)';
+    } else if (usuariosRegistrados.some(u => u.email.toLowerCase() === datos.email.toLowerCase())) {
+      errores.email = 'Este email ya está registrado';
+    }
+  }
+  
+  // Validar contraseña
+  if (!datos.password || datos.password.length === 0) {
+    errores.password = 'La contraseña es requerida';
+  } else if (datos.password.length < 8) {
+    errores.password = 'La contraseña debe tener al menos 8 caracteres';
+  } else if (datos.password.length > 128) {
+    errores.password = 'La contraseña no puede exceder 128 caracteres';
+  } else if (!/(?=.*[a-z])/.test(datos.password)) {
+    errores.password = 'Debe contener al menos una letra minúscula (a-z)';
+  } else if (!/(?=.*[A-Z])/.test(datos.password)) {
+    errores.password = 'Debe contener al menos una letra mayúscula (A-Z)';
+  } else if (!/(?=.*\d)/.test(datos.password)) {
+    errores.password = 'Debe contener al menos un número (0-9)';
+  }
+  
+  // Validar confirmación de contraseña
+  if (!datos.passwordConfirm || datos.passwordConfirm.length === 0) {
+    errores.passwordConfirm = 'Debe confirmar la contraseña';
+  } else if (datos.password !== datos.passwordConfirm) {
+    errores.passwordConfirm = 'Las contraseñas no coinciden';
+  }
+  
+  return {
+    valido: Object.keys(errores).length === 0,
+    errores: errores
+  };
+}
+
+/**
+ * Validar datos de login
+ * @param {Object} datos - Email y contraseña
+ * @returns {Object} Validación y errores
+ */
+function validarLogin(datos) {
+  const errores = {};
+  
+  if (!datos.email || datos.email.trim().length === 0) {
+    errores.email = 'El email es requerido';
+  } else {
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!regexEmail.test(datos.email.trim())) {
+      errores.email = 'Por favor ingresa un email válido';
+    }
+  }
+  
+  if (!datos.password || datos.password.length === 0) {
+    errores.password = 'La contraseña es requerida';
+  }
+  
+  return {
+    valido: Object.keys(errores).length === 0,
+    errores: errores
+  };
+}
+
+/**
+ * Mostrar errores de registro
+ * @param {Object} errores - Errores de validación
+ */
+function mostrarErroresRegistro(errores) {
+  document.getElementById('registerUsernameError').textContent = errores.username || '';
+  document.getElementById('registerEmailError').textContent = errores.email || '';
+  document.getElementById('registerPasswordError').textContent = errores.password || '';
+  document.getElementById('registerPasswordConfirmError').textContent = errores.passwordConfirm || '';
+}
+
+/**
+ * Mostrar errores de login
+ * @param {Object} errores - Errores de validación
+ */
+function mostrarErroresLogin(errores) {
+  document.getElementById('loginEmailError').textContent = errores.email || '';
+  document.getElementById('loginPasswordError').textContent = errores.password || '';
+}
+
+/**
+ * Limpiar errores de registro
+ */
+function limpiarErroresRegistro() {
+  document.getElementById('registerUsernameError').textContent = '';
+  document.getElementById('registerEmailError').textContent = '';
+  document.getElementById('registerPasswordError').textContent = '';
+  document.getElementById('registerPasswordConfirmError').textContent = '';
+}
+
+/**
+ * Limpiar errores de login
+ */
+function limpiarErroresLogin() {
+  document.getElementById('loginEmailError').textContent = '';
+  document.getElementById('loginPasswordError').textContent = '';
+}
+
+/**
+ * Actualizar botones de autenticación
+ */
+function actualizarBotonesAutenticacion() {
+  const authButton = document.getElementById('authButton');
+  
+  if (usuarioActual) {
+    authButton.textContent = `Hola, ${usuarioActual.username}`;
+    authButton.style.backgroundColor = 'var(--primary)';
+    authButton.onclick = function(e) {
+      e.preventDefault();
+      cerrarSesion();
+    };
+  } else {
+    authButton.textContent = 'Ingresar';
+    authButton.style.backgroundColor = '';
+    authButton.onclick = null;
+  }
+}
+
+/**
+ * Cerrar sesión
+ */
+function cerrarSesion() {
+  usuarioActual = null;
+  localStorage.removeItem('sesionActiva');
+  actualizarBotonesAutenticacion();
+  cerrarModal();
+  alert('✅ Sesión cerrada correctamente');
+}
+
+/**
+ * Abrir modal de autenticación
+ */
+function abrirModal() {
+  const authModal = document.getElementById('authModal');
+  authModal.classList.add('active');
+}
+
+/**
+ * Cerrar modal de autenticación
+ */
+function cerrarModal() {
+  const authModal = document.getElementById('authModal');
+  authModal.classList.remove('active');
+}
+
+/**
+ * Manejar eventos de autenticación
+ */
+function inicializarAutenticacion() {
+  cargarUsuariosGuardados();
+  
+  // Elementos del modal
+  const authModal = document.getElementById('authModal');
+  const closeModal = document.getElementById('closeModal');
+  const authButton = document.getElementById('authButton');
+  const loginTab = document.getElementById('loginTab');
+  const registerTab = document.getElementById('registerTab');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  
+  // Verificar que existan los elementos
+  if (!authModal || !loginForm || !registerForm) {
+    console.error('No se encontraron los elementos del modal de autenticación');
+    return;
+  }
+  
+  // Abrir modal
+  if (authButton) {
+    authButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (usuarioActual) {
+        cerrarSesion();
+      } else {
+        abrirModal();
+      }
+    });
+  }
+  
+  // Cerrar modal
+  if (closeModal) {
+    closeModal.addEventListener('click', cerrarModal);
+  }
+  
+  // Cerrar modal al hacer clic fuera del contenido
+  authModal.addEventListener('click', function(e) {
+    if (e.target === authModal) {
+      cerrarModal();
+    }
+  });
+  
+  // Cambiar entre tabs (Login/Registro)
+  if (loginTab && registerTab) {
+    loginTab.addEventListener('click', function() {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginForm.classList.add('active');
+      registerForm.classList.remove('active');
+      limpiarErroresLogin();
+      limpiarErroresRegistro();
+    });
+    
+    registerTab.addEventListener('click', function() {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      registerForm.classList.add('active');
+      loginForm.classList.remove('active');
+      limpiarErroresLogin();
+      limpiarErroresRegistro();
+    });
+  }
+  
+  // ========== MANEJO DE FORMULARIO DE LOGIN ==========
+  loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    try {
+      limpiarErroresLogin();
+      const loginMsg = document.getElementById('loginMsg');
+      
+      // Verificar que los elementos existan
+      const loginEmailEl = document.getElementById('loginEmail');
+      const loginPasswordEl = document.getElementById('loginPassword');
+      
+      if (!loginEmailEl || !loginPasswordEl) {
+        console.error('No se encontraron los elementos del formulario de login');
+        loginMsg.textContent = '❌ Error: No se encontraron los campos del formulario';
+        loginMsg.className = 'form-message error';
+        return;
+      }
+      
+      loginMsg.textContent = '';
+      loginMsg.className = '';
+      
+      const datos = {
+        email: loginEmailEl.value.trim(),
+        password: loginPasswordEl.value
+      };
+      
+      console.log('Datos de login:', datos);
+      
+      const validacion = validarLogin(datos);
+      
+      if (!validacion.valido) {
+        mostrarErroresLogin(validacion.errores);
+        loginMsg.textContent = '❌ Por favor completa todos los campos';
+        loginMsg.className = 'form-message error';
+        return;
+      }
+      
+      // Buscar usuario
+      const usuarioEncontrado = usuariosRegistrados.find(u => 
+        u.email.toLowerCase() === datos.email.toLowerCase() && u.password === datos.password
+      );
+      
+      if (usuarioEncontrado) {
+        usuarioActual = usuarioEncontrado;
+        guardarSesion(usuarioActual);
+        actualizarBotonesAutenticacion();
+        
+        loginMsg.textContent = `✅ ¡Bienvenido, ${usuarioActual.username}!`;
+        loginMsg.className = 'form-message success';
+        
+        loginForm.reset();
+        
+        setTimeout(() => {
+          cerrarModal();
+        }, 1500);
+      } else {
+        console.log('Usuario no encontrado o contraseña incorrecta');
+        document.getElementById('loginPasswordError').textContent = 'Email o contraseña incorrectos';
+        loginMsg.textContent = '❌ Credenciales inválidas';
+        loginMsg.className = 'form-message error';
+      }
+    } catch (error) {
+      console.error('Error en login:', error);
+      const loginMsg = document.getElementById('loginMsg');
+      loginMsg.textContent = '❌ Error al procesar el login: ' + error.message;
+      loginMsg.className = 'form-message error';
+    }
+  });
+  
+  // ========== MANEJO DE FORMULARIO DE REGISTRO ==========
+  registerForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    try {
+      limpiarErroresRegistro();
+      const registerMsg = document.getElementById('registerMsg');
+      
+      // Verificar que los elementos existan
+      const regUsername = document.getElementById('registerUsername');
+      const regEmail = document.getElementById('registerEmail');
+      const regPassword = document.getElementById('registerPassword');
+      const regPasswordConfirm = document.getElementById('registerPasswordConfirm');
+      
+      if (!regUsername || !regEmail || !regPassword || !regPasswordConfirm) {
+        console.error('No se encontraron los elementos del formulario');
+        registerMsg.textContent = '❌ Error: No se encontraron los campos del formulario';
+        registerMsg.className = 'form-message error';
+        return;
+      }
+      
+      registerMsg.textContent = '';
+      registerMsg.className = '';
+      
+      const datos = {
+        username: regUsername.value.trim(),
+        email: regEmail.value.trim(),
+        password: regPassword.value,
+        passwordConfirm: regPasswordConfirm.value
+      };
+      
+      console.log('Datos de registro:', datos);
+      
+      const validacion = validarRegistro(datos);
+      
+      console.log('Validación:', validacion);
+      
+      if (!validacion.valido) {
+        mostrarErroresRegistro(validacion.errores);
+        registerMsg.textContent = '❌ Por favor completa correctamente todos los campos';
+        registerMsg.className = 'form-message error';
+        return;
+      }
+      
+      // Crear nuevo usuario
+      const nuevoUsuario = UsuarioAuth.crear(datos.username, datos.email, datos.password);
+      usuariosRegistrados.push(nuevoUsuario);
+      
+      console.log('Usuario creado:', nuevoUsuario);
+      
+      // Guardar en localStorage
+      guardarUsuariosEnStorage();
+      
+      // Mostrar mensaje de éxito
+      registerMsg.textContent = '✅ ¡Cuenta creada exitosamente! Inicia sesión para continuar.';
+      registerMsg.className = 'form-message success';
+      
+      registerForm.reset();
+      
+      // Cambiar a tab de login
+      setTimeout(() => {
+        loginTab.click();
+      }, 2000);
+    } catch (error) {
+      console.error('Error en registro:', error);
+      const registerMsg = document.getElementById('registerMsg');
+      registerMsg.textContent = '❌ Error al procesar el registro: ' + error.message;
+      registerMsg.className = 'form-message error';
+    }
+  });
+}
